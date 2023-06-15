@@ -1,0 +1,17 @@
+{
+  "name": "hardhat-project",
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^3.0.0",
+    "@types/axios": "^0.14.0",
+    "@types/ethereumjs-util": "^6.1.0",
+    "@types/node": "^20.2.5",
+    "hardhat": "^2.15.0"
+  },
+  "dependencies": {
+    "@chainlink/contracts": "^0.6.1",
+    "axios": "^1.4.0",
+    "ethereumjs-util": "^7.1.5",
+    "keccak256": "^1.0.6",
+    "merkletreejs": "^0.3.10"
+  }
+}

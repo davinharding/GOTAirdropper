@@ -45,9 +45,7 @@ contract GOTDistributor {
         if(lastClaimed[msg.sender] == 0){
             lastClaimed[msg.sender] = contractBirth;
         }
-        uint256 daysSinceLastClaim = (block.timestamp - lastClaimed[msg.sender]) / 6000 ;
-        console.log('times', block.timestamp, lastClaimed[msg.sender]);
-        console.log('daysSinceLastClaim', daysSinceLastClaim);
+        uint256 daysSinceLastClaim = (block.timestamp - lastClaimed[msg.sender]) / 13900; // ~13,900 blocks per day on theta mainnet 
         // Ensure the user waits for at least a day between claims.
         require(daysSinceLastClaim > 0, "Must wait for a day before claiming");
       

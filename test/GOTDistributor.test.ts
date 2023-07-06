@@ -57,16 +57,15 @@ describe('GOTDistributor', function () {
     });
 
     it('Should succeed if the merkle proof is valid', async function () {
-      await network.provider.send("hardhat_mine", [ethers.utils.hexlify(6000)]);
+      await network.provider.send("hardhat_mine", [ethers.utils.hexlify(55600)]);
 
-      console.log(keccak256(await addr1.getAddress()));
       const leaf = keccak256(await addr1.getAddress());
       const proof = merkleTree.getHexProof(leaf);
 
       await rewardDistributor.connect(addr1).claimReward(proof);
 
       const newBalance = await rewardToken.balanceOf(await addr1.getAddress());
-      expect(parseFloat(ethers.utils.formatEther(newBalance.toString()))).to.equal(10);
+      expect(parseFloat(ethers.utils.formatEther(newBalance.toString()))).to.equal(40);
     });
 
     // Add more tests for different edge cases

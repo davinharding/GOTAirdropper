@@ -3,14 +3,14 @@ pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 import "hardhat/console.sol";
 
-contract GOTDistributor {
+contract GOTDistributor is Ownable {
     IERC20 public rewardToken;
     bytes32 public merkleRoot;
     uint256 public distributionRate;
     uint256 public contractBirth;
-    address public owner;
     mapping(address => uint256) public lastClaimed;
 
     event RewardPaid(address indexed user, uint256 amount);
@@ -19,14 +19,8 @@ contract GOTDistributor {
         rewardToken = _rewardToken;
         merkleRoot = _merkleRoot;
         distributionRate = _distributionRate;
-        owner = msg.sender;
         contractBirth = block.timestamp;
-    }
-
-    modifier onlyOwner {
-        require(msg.sender == owner, "Not authorized");
-        _;
-    }
+    } 
 
     function updateMerkleRoot(bytes32 _merkleRoot) external onlyOwner {
         merkleRoot = _merkleRoot;
@@ -62,6 +56,7 @@ contract GOTDistributor {
         // Update the last claimed time.
         lastClaimed[msg.sender] = block.timestamp;
 
+        // emit RewardPaid event with recipient and amount.
         emit RewardPaid(msg.sender, rewardAmount);
     }
 }

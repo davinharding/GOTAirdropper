@@ -5,12 +5,18 @@ import { MerkleTree } from 'merkletreejs';
 import keccak256 from 'keccak256';
 
 describe('GOTDistributor', function () {
-  let RewardDistributor: any;
-  let rewardDistributor: Contract;
-  let owner: Signer, addr1: Signer, addr2: Signer, addr3: Signer;
-  let rewardToken: any;
+  let 
+  RewardDistributor: any, 
+  rewardDistributor: Contract, 
+  owner: Signer, 
+  addr1: Signer, 
+  addr2: Signer, 
+  addr3: Signer, 
+  rewardToken: any, 
+  merkleTree: MerkleTree;
+  
   const distributionRate: number = 10; // replace with your desired distribution rate
-  let merkleTree: MerkleTree, leaf: Buffer, proof: any;
+  
 
   beforeEach(async () => {
     RewardDistributor = await ethers.getContractFactory('GOTDistributor');
@@ -34,7 +40,7 @@ describe('GOTDistributor', function () {
     await rewardDistributor.deployed();
     
     // Transfer tokens to the RewardDistributor contract
-    await rewardToken.transfer(rewardDistributor.address, ethers.utils.parseEther('1000000'));
+    await rewardToken.transfer(rewardDistributor.address, ethers.utils.parseEther('40'));
   });
 
   describe('Deployment', function () {
@@ -57,7 +63,7 @@ describe('GOTDistributor', function () {
     });
 
     it('Should succeed if the merkle proof is valid', async function () {
-      await network.provider.send("hardhat_mine", [ethers.utils.hexlify(55600)]);
+      await network.provider.send("hardhat_mine", [ethers.utils.hexlify(41700)]);
 
       const leaf = keccak256(await addr1.getAddress());
       const proof = merkleTree.getHexProof(leaf);
@@ -65,11 +71,49 @@ describe('GOTDistributor', function () {
       await rewardDistributor.connect(addr1).claimReward(proof);
 
       const newBalance = await rewardToken.balanceOf(await addr1.getAddress());
-      expect(parseFloat(ethers.utils.formatEther(newBalance.toString()))).to.equal(40);
+
+      expect(parseFloat(ethers.utils.formatEther(newBalance.toString()))).to.equal(30);
+    });
+
+    it('Should revert if there are not enough tokens', async () => {
+      await network.provider.send("hardhat_mine", [ethers.utils.hexlify(55000), "0x3c"]);
+
+      const leaf = keccak256(await addr1.getAddress());
+      const proof = merkleTree.getHexProof(leaf);
+
+      await expect(rewardDistributor.connect(addr1).claimReward(proof)).to.be.revertedWith('Not enough tokens');
+
+    })
+
+    it('Should revert if claim is made before at least one day has elapsed', async () => {
+      const leaf = keccak256(await addr1.getAddress());
+      const proof = merkleTree.getHexProof(leaf);
+
+      await expect(rewardDistributor.connect(addr1).claimReward(proof)).to.be.revertedWith("Must wait for a day before claiming");
+
+    })
+
+    it('Should revert if at least one day has not elapsed after a successful claim', async function () {
+      await network.provider.send("hardhat_mine", [ethers.utils.hexlify(41700)]);
+
+      const leaf = keccak256(await addr1.getAddress());
+      const proof = merkleTree.getHexProof(leaf);
+
+      await rewardDistributor.connect(addr1).claimReward(proof);
+
+      await expect(rewardDistributor.connect(addr1).claimReward(proof)).to.be.revertedWith("Must wait for a day before claiming");
     });
 
     // Add more tests for different edge cases
   });
+
+  describe('Ownership', () => {
+    it('should be able to transfer ownership', async () => {
+      await rewardDistributor.transferOwnership(addr1.getAddress());
+
+      expect(await rewardDistributor.owner()).to.equal(await addr1.getAddress());
+    })
+  })
 
   // Add more tests for different edge cases
 });

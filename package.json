@@ -36,6 +36,7 @@
   "dependencies": {
     "@openzeppelin/contracts": "^4.6.0",
     "@openzeppelin/test-helpers": "^0.5.15",
+    "axios": "^1.4.0",
     "crypto-js": "^4.1.1",
     "erc721a": "^3.3.0",
     "keccak256": "^1.0.6",

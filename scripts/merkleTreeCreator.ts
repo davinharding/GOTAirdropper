@@ -20,7 +20,7 @@ async function getStakeByAddress(address: string): Promise<StakeResponse> {
 async function getStakedAddresses(nodeAddress: string): Promise<string[]> {
   const stakeData = await getStakeByAddress(nodeAddress);
   const stakedAddresses = stakeData.body.holderRecords.map(record => record.source);
-  // console.log('stakedAddresses', stakedAddresses);
+  console.log('stakedAddresses', stakedAddresses);
   return stakedAddresses;
 }
 

@@ -14,12 +14,14 @@ interface StakeResponse {
 
 async function getStakeByAddress(address: string): Promise<StakeResponse> {
   const response = await axios.get<StakeResponse>(`https://explorer.thetatoken.org:8443/api/stake/${address}`);
+  // console.log('response.data.body', response.data.body)
   return response.data;
 }
 
 async function getStakedAddresses(nodeAddress: string): Promise<string[]> {
   const stakeData = await getStakeByAddress(nodeAddress);
   const stakedAddresses = stakeData.body.holderRecords.map(record => record.source);
+  stakedAddresses.push('0x94538853Fd519B99964369fe84e6475d705A4454')
   console.log('stakedAddresses', stakedAddresses);
   return stakedAddresses;
 }

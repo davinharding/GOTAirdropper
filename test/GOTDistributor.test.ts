@@ -1,4 +1,4 @@
-import { ethers, network } from "hardhat";
+import { network, ethers } from "hardhat";
 import { expect } from 'chai';
 import { Contract, Signer } from 'ethers';
 import { MerkleTree } from 'merkletreejs';

@@ -7,9 +7,11 @@ async function main() {
 
   const RewardDistributor = await ethers.getContractFactory('GOTDistributor');
   const rewardDistributor = await RewardDistributor.deploy(
-    "0xf7578080ffae18c9e3ba2eccd9628946816a7dfe", // erc721 address 
-    "0x14e4c61d6aa9accda3850b201077cebf464dcb31", // erc20 address
-    15, // reward rate per day
+    "0xfdbf39114ba853d811032d3e528c2b4b7adcecd6",  
+    "TRT", 
+    18, 
+    1000000,
+    false
     );
   await rewardDistributor.deployed();
 

@@ -10,7 +10,7 @@ const config: HardhatUserConfig = {
   networks: {
     thetaTestnet: {
       url: `https://eth-rpc-api-testnet.thetatoken.org/rpc`,
-      // accounts: [THETA_TESTNET_KEY as string],
+      accounts: [THETA_TESTNET_KEY as string],
       chainId: 365,
       gasPrice: 4000000000000
     },

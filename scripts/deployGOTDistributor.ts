@@ -8,10 +8,8 @@ async function main() {
   const RewardDistributor = await ethers.getContractFactory('GOTDistributor');
   const rewardDistributor = await RewardDistributor.deploy(
     "0xfdbf39114ba853d811032d3e528c2b4b7adcecd6",  
-    "TRT", 
-    18, 
-    1000000,
-    false
+    "0x36ac1c4cc63cf6cf1b0604621a180507ec5d827465dcf03602e624d5954bb850", 
+    10, 
     );
   await rewardDistributor.deployed();
 

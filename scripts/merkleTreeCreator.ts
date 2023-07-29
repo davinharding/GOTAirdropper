@@ -29,16 +29,16 @@ async function getStakedAddresses(nodeAddress: string): Promise<string[]> {
 
 function createMerkleTree(addresses: string[]): MerkleTree {
   const leaves = addresses.map(address => keccak256(toBuffer(address)));
-  const tree = new MerkleTree(leaves, keccak256);
+  const tree = new MerkleTree(leaves, keccak256, { sort: true });
   return tree;
 }
 
 async function main() {
-  const nodeAddress = '0x104f8b65bf3fa313cc2998b2ab7319f9eca57089'; // replace with your node address
+  const nodeAddress = '0x104f8b65bf3fa313cc2998b2ab7319f9eca57089'; 
   const addresses = await getStakedAddresses(nodeAddress);
   const merkleTree = createMerkleTree(addresses);
-  console.log('Root:', bufferToHex(merkleTree.getRoot()));
-  // console.log('Tree:', merkleTree);
+  console.log('Root:', merkleTree.getHexRoot());
+  console.log('Tree:', merkleTree);
 }
 
 main().catch(console.error);

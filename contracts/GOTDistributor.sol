@@ -4,7 +4,6 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "hardhat/console.sol";
 
 contract GOTDistributor is Ownable {
     IERC20 public rewardToken;
@@ -28,6 +27,10 @@ contract GOTDistributor is Ownable {
 
     function updateDistributionRate(uint256 _distributionRate) external onlyOwner {
         distributionRate = _distributionRate;
+    }
+
+    function updateRewardToken(IERC20 _rewardTokenAddress) external onlyOwner {
+        rewardToken = _rewardTokenAddress;
     }
 
     function claimReward(bytes32[] calldata merkleProof) external {

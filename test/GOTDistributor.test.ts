@@ -67,7 +67,6 @@ describe('GOTDistributor', function () {
 
       const leaf = keccak256(await addr1.getAddress());
       const proof = merkleTree.getHexProof(leaf);
-
       await rewardDistributor.connect(addr1).claimReward(proof);
 
       const newBalance = await rewardToken.balanceOf(await addr1.getAddress());
@@ -112,6 +111,17 @@ describe('GOTDistributor', function () {
       await rewardDistributor.transferOwnership(addr1.getAddress());
 
       expect(await rewardDistributor.owner()).to.equal(await addr1.getAddress());
+    })
+  })
+
+  describe('RewardToken', () => {
+    it('should be able to update the rewardToken correctly', async () => {
+      await rewardDistributor.updateRewardToken('0x14e4c61d6aa9accda3850b201077cebf464dcb31');
+      console.log(typeof await rewardDistributor.rewardToken());
+
+      const address = await rewardDistributor.rewardToken();
+
+      expect(address.toLowerCase()).to.equal('0x14e4c61d6aa9accda3850b201077cebf464dcb31')
     })
   })
 

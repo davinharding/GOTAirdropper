@@ -6,11 +6,12 @@ async function main() {
   console.log("Account balance:", (await deployer.getBalance()).toString());
 
   const RewardToken = await ethers.getContractFactory('RewardToken');
+  const ethersToWei = ethers.utils.parseUnits("10000000", "ether");
   const rewardToken = await RewardToken.deploy(
     "TestRewardToken",  
     "TRT", 
     18, 
-    1000000e18,
+    ethersToWei,
     false
     );
   await rewardToken.deployed();

@@ -1,13 +1,3 @@
-# Sample Hardhat Project
+# GOT Airdropper
 
-This project demonstrates a basic Hardhat use case. It comes with a sample contract, a test for that contract, and a script that deploys that contract.
-
-Try running some of the following tasks:
-
-```shell
-npx hardhat help
-npx hardhat test
-REPORT_GAS=true npx hardhat test
-npx hardhat node
-npx hardhat run scripts/deploy.ts
-```
+This is a smart contract that handles the distribution and claiming of a reward token for stakers to a specified Guardian node.  It also includes some helpful deploy scripts, a merkleTree generator script, automated unit tests and a Reward Token contract that emulates the one generated from the native Theta token minter to be used for testing purposes.

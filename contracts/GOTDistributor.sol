@@ -13,12 +13,14 @@ contract GOTDistributor is Ownable {
     mapping(address => uint256) public lastClaimed;
 
     event RewardPaid(address indexed user, uint256 amount);
+    event TokensWithdrawn(address indexed owner, uint256 amount);
+
 
     constructor(IERC20 _rewardToken, bytes32 _merkleRoot, uint256 _distributionRate) {
         rewardToken = _rewardToken;
         merkleRoot = _merkleRoot;
         distributionRate = _distributionRate;
-        contractBirth = block.timestamp;
+        contractBirth = block.number;
     } 
 
     function updateMerkleRoot(bytes32 _merkleRoot) external onlyOwner {
@@ -42,7 +44,7 @@ contract GOTDistributor is Ownable {
         if(lastClaimed[msg.sender] == 0){
             lastClaimed[msg.sender] = contractBirth;
         }
-        uint256 daysSinceLastClaim = (block.timestamp - lastClaimed[msg.sender]) / 13900; // ~13,900 blocks per day on theta mainnet 
+        uint256 daysSinceLastClaim = (block.number - lastClaimed[msg.sender]) / 13900; // ~13,900 blocks per day on theta mainnet 
         // Ensure the user waits for at least a day between claims.
         require(daysSinceLastClaim > 0, "Must wait for a day before claiming");
       
@@ -57,9 +59,16 @@ contract GOTDistributor is Ownable {
         rewardToken.transfer(msg.sender, rewardAmount);
 
         // Update the last claimed time.
-        lastClaimed[msg.sender] = block.timestamp;
+        lastClaimed[msg.sender] = block.number;
 
         // emit RewardPaid event with recipient and amount.
         emit RewardPaid(msg.sender, rewardAmount);
+    }
+
+    function withdrawTokens(uint256 amount) external onlyOwner {
+        uint256 balance = rewardToken.balanceOf(address(this));
+        require(balance >= amount, "Insufficient tokens in contract");
+        rewardToken.transfer(owner(), amount);
+        emit TokensWithdrawn(owner(), amount);
     }
 }

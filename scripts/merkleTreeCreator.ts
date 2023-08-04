@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { keccak256, bufferToHex, toBuffer } from 'ethereumjs-util';
+import { keccak256, toBuffer } from 'ethereumjs-util';
 import { MerkleTree } from 'merkletreejs';
 
 interface StakeRecord {

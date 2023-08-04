@@ -40,7 +40,7 @@ describe('GOTDistributor', function () {
     await rewardDistributor.deployed();
     
     // Transfer tokens to the RewardDistributor contract
-    await rewardToken.transfer(rewardDistributor.address, ethers.utils.parseEther('40'));
+    await rewardToken.transfer(rewardDistributor.address, ethers.utils.parseEther('35'));
   });
 
   describe('Deployment', function () {
@@ -75,7 +75,7 @@ describe('GOTDistributor', function () {
     });
 
     it('Should revert if there are not enough tokens', async () => {
-      await network.provider.send("hardhat_mine", [ethers.utils.hexlify(55000), "0x3c"]);
+      await network.provider.send("hardhat_mine", [ethers.utils.hexlify(55600)]);
 
       const leaf = keccak256(await addr1.getAddress());
       const proof = merkleTree.getHexProof(leaf);
@@ -117,13 +117,39 @@ describe('GOTDistributor', function () {
   describe('RewardToken', () => {
     it('should be able to update the rewardToken correctly', async () => {
       await rewardDistributor.updateRewardToken('0x14e4c61d6aa9accda3850b201077cebf464dcb31');
-      console.log(typeof await rewardDistributor.rewardToken());
 
       const address = await rewardDistributor.rewardToken();
 
       expect(address.toLowerCase()).to.equal('0x14e4c61d6aa9accda3850b201077cebf464dcb31')
     })
   })
+
+  describe('withdrawTokens', () => {
+    it('should only be callable by the contract owner', async () => {
+      const amountToWithdraw = ethers.utils.parseEther('10');
+      
+      // Non-owner account trying to withdraw tokens
+      await expect(rewardDistributor.connect(addr1).withdrawTokens(amountToWithdraw)).to.be.revertedWith("Ownable: caller is not the owner");
+    })
+
+    it('should revert if the contract balance is insufficient', async () => {
+      const amountToWithdraw = ethers.utils.parseEther('50');
+      
+      // Owner trying to withdraw more tokens than the contract balance
+      await expect(rewardDistributor.connect(owner).withdrawTokens(amountToWithdraw)).to.be.revertedWith("Insufficient tokens in contract");
+    })
+
+    it('should successfully withdraw tokens when the contract has enough balance', async () => {
+      const amountToWithdraw = ethers.utils.parseEther('10');
+      const initialBalance = await rewardToken.balanceOf(await owner.getAddress());
+
+      await rewardDistributor.connect(owner).withdrawTokens(amountToWithdraw);
+
+      const newBalance = await rewardToken.balanceOf(await owner.getAddress());
+
+      expect(newBalance).to.equal(initialBalance.add(amountToWithdraw));
+    })
+})
 
   // Add more tests for different edge cases
 });

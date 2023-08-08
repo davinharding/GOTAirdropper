@@ -71,7 +71,7 @@ describe('GOTDistributor', function () {
 
       const newBalance = await rewardToken.balanceOf(await addr1.getAddress());
 
-      expect(parseFloat(ethers.utils.formatEther(newBalance.toString()))).to.equal(30);
+      expect(Math.round(parseFloat(ethers.utils.formatEther(newBalance.toString())))).to.equal(30);
     });
 
     it('Should revert if there are not enough tokens', async () => {

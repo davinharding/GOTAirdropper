@@ -44,13 +44,12 @@ contract GOTDistributor is Ownable {
         if(lastClaimed[msg.sender] == 0){
             lastClaimed[msg.sender] = contractBirth;
         }
-        uint256 daysSinceLastClaim = (block.number - lastClaimed[msg.sender]) / 13900; // ~13,900 blocks per day on theta mainnet 
+        uint256 daysSinceLastClaim = (block.number - lastClaimed[msg.sender]) * 1e18 / 13900; // ~13,900 blocks per day on theta mainnet, * 1e18 to allow for fractions of a day 
         // Ensure the user waits for at least a day between claims.
-        require(daysSinceLastClaim > 0, "Must wait for a day before claiming");
-      
+        require(daysSinceLastClaim > 1e18, "Must wait for a day before claiming");      
 
         // Calculate the reward amount.
-        uint256 rewardAmount = (distributionRate * 1e18) * daysSinceLastClaim; // convert eth value to wei and multiply by daysSinceLastClaim
+        uint256 rewardAmount = (distributionRate) * daysSinceLastClaim; // convert eth value to wei and multiply by daysSinceLastClaim
 
         // Ensure the contract has enough tokens to pay the reward.
         require(rewardToken.balanceOf(address(this)) >= rewardAmount, "Not enough tokens");

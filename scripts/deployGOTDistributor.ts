@@ -8,7 +8,7 @@ async function main() {
   const RewardDistributor = await ethers.getContractFactory('GOTDistributor');
   const rewardDistributor = await RewardDistributor.deploy(
     "0xb8a9116493e191a43224e3971c7e9f23522b0883",  
-    "0xac03a71939430b5488ac76e9c1f52b4f94bdb4aaaf7a7b594999a49d83efb525", 
+    "0xb4e44aea7ffdc2797b046470c1a9c33f2a249404806c276832a71fb72f1db685", 
     10, 
     );
   await rewardDistributor.deployed();

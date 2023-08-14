@@ -10,6 +10,7 @@ contract GOTDistributor is Ownable {
     bytes32 public merkleRoot;
     uint256 public distributionRate;
     uint256 public contractBirth;
+    uint256 public claimWaitTimeInBlocks;
     mapping(address => uint256) public lastClaimed;
 
     event RewardPaid(address indexed user, uint256 amount);
@@ -21,6 +22,7 @@ contract GOTDistributor is Ownable {
         merkleRoot = _merkleRoot;
         distributionRate = _distributionRate;
         contractBirth = block.number;
+        claimWaitTimeInBlocks = 13900;
     } 
 
     function updateMerkleRoot(bytes32 _merkleRoot) external onlyOwner {
@@ -35,6 +37,10 @@ contract GOTDistributor is Ownable {
         rewardToken = _rewardTokenAddress;
     }
 
+    function updateClaimWaitTimeInBlocks(uint256 _claimWaitTimeInBlocks) external onlyOwner {
+        claimWaitTimeInBlocks = _claimWaitTimeInBlocks;
+    }
+
     function claimReward(bytes32[] calldata merkleProof) external {
         // Verify the merkle proof.
         bytes32 leaf = keccak256(abi.encodePacked(msg.sender));
@@ -44,7 +50,7 @@ contract GOTDistributor is Ownable {
         if(lastClaimed[msg.sender] == 0){
             lastClaimed[msg.sender] = contractBirth;
         }
-        uint256 daysSinceLastClaim = (block.number - lastClaimed[msg.sender]) * 1e18 / 13900; // ~13,900 blocks per day on theta mainnet, * 1e18 to allow for fractions of a day 
+        uint256 daysSinceLastClaim = (block.number - lastClaimed[msg.sender]) * 1e18 / claimWaitTimeInBlocks; // ~13,900 blocks per day on theta mainnet, * 1e18 to allow for fractions of a day 
         // Ensure the user waits for at least a day between claims.
         require(daysSinceLastClaim > 1e18, "Must wait for a day before claiming");      
 

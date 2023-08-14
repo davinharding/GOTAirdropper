@@ -41,6 +41,9 @@ describe('GOTDistributor', function () {
     
     // Transfer tokens to the RewardDistributor contract
     await rewardToken.transfer(rewardDistributor.address, ethers.utils.parseEther('35'));
+
+    // Approve rewardDistributor for spending
+    // await rewardToken.approve(rewardDistributor.address, '1000000000000000000000000');
   });
 
   describe('Deployment', function () {
@@ -149,7 +152,20 @@ describe('GOTDistributor', function () {
 
       expect(newBalance).to.equal(initialBalance.add(amountToWithdraw));
     })
-})
+  })
+
+  describe('claimWaitTimeInBlocks', () => {
+    it('should set the claimWaitTimeInBlocks to 13900', async () => {
+      expect(await rewardDistributor.claimWaitTimeInBlocks()).to.equal(13900);
+    })
+
+    it('should be able to update the claimWaitTimeInBlocks', async () => {
+      await rewardDistributor.updateClaimWaitTimeInBlocks(0);
+
+      expect(await rewardDistributor.claimWaitTimeInBlocks()).to.equal(0);
+    })
+  })
+
 
   // Add more tests for different edge cases
 });

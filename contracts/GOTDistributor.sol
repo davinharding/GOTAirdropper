@@ -12,17 +12,17 @@ contract GOTDistributor is Ownable {
     uint256 public contractBirth;
     uint256 public claimWaitTimeInBlocks;
     mapping(address => uint256) public lastClaimed;
+    mapping(address => uint256) public amountStaked;
 
     event RewardPaid(address indexed user, uint256 amount);
     event TokensWithdrawn(address indexed owner, uint256 amount);
-
 
     constructor(IERC20 _rewardToken, bytes32 _merkleRoot, uint256 _distributionRate) {
         rewardToken = _rewardToken;
         merkleRoot = _merkleRoot;
         distributionRate = _distributionRate;
         contractBirth = block.number;
-        claimWaitTimeInBlocks = 13900;
+        claimWaitTimeInBlocks = 13900; // roughly one day in blocks on theta chain
     } 
 
     function updateMerkleRoot(bytes32 _merkleRoot) external onlyOwner {
@@ -48,11 +48,11 @@ contract GOTDistributor is Ownable {
 
         // Calculate the number of days that have passed since the last claim.
         if(lastClaimed[msg.sender] == 0){
-            lastClaimed[msg.sender] = contractBirth;
+            lastClaimed[msg.sender] = block.number - claimWaitTimeInBlocks; // set towards current block number minus claimWaitTimeInBlocks so that the first time they claim they can only claim up to 10 GOT
         }
-        uint256 daysSinceLastClaim = (block.number - lastClaimed[msg.sender]) * 1e18 / claimWaitTimeInBlocks; // ~13,900 blocks per day on theta mainnet, * 1e18 to allow for fractions of a day 
+        uint256 daysSinceLastClaim = (block.number - lastClaimed[msg.sender]) * 1e18 / claimWaitTimeInBlocks; // * 1e18 to allow for fractions of a day 
         // Ensure the user waits for at least a day between claims.
-        require(daysSinceLastClaim > 1e18, "Must wait for a day before claiming");      
+        require(daysSinceLastClaim >= 1e18, "Must wait for a day before claiming");      
 
         // Calculate the reward amount.
         uint256 rewardAmount = (distributionRate) * daysSinceLastClaim; // convert eth value to wei and multiply by daysSinceLastClaim

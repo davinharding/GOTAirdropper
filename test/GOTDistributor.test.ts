@@ -40,7 +40,7 @@ describe('GOTDistributor', function () {
     await rewardDistributor.deployed();
     
     // Transfer tokens to the RewardDistributor contract
-    await rewardToken.transfer(rewardDistributor.address, ethers.utils.parseEther('35'));
+    await rewardToken.transfer(rewardDistributor.address, ethers.utils.parseEther('15'));
 
     // Approve rewardDistributor for spending
     // await rewardToken.approve(rewardDistributor.address, '1000000000000000000000000');
@@ -74,14 +74,18 @@ describe('GOTDistributor', function () {
 
       const newBalance = await rewardToken.balanceOf(await addr1.getAddress());
 
-      expect(Math.round(parseFloat(ethers.utils.formatEther(newBalance.toString())))).to.equal(30);
+      expect(Math.round(parseFloat(ethers.utils.formatEther(newBalance.toString())))).to.equal(10); // even though 3 days have elapsed the first claim can only be for up to one day
     });
 
     it('Should revert if there are not enough tokens', async () => {
-      await network.provider.send("hardhat_mine", [ethers.utils.hexlify(55600)]);
+      await network.provider.send("hardhat_mine", [ethers.utils.hexlify(13900)]);
 
       const leaf = keccak256(await addr1.getAddress());
       const proof = merkleTree.getHexProof(leaf);
+
+      await rewardDistributor.connect(addr1).claimReward(proof);
+
+      await network.provider.send("hardhat_mine", [ethers.utils.hexlify(13900)]);
 
       await expect(rewardDistributor.connect(addr1).claimReward(proof)).to.be.revertedWith('Not enough tokens');
 
@@ -90,6 +94,8 @@ describe('GOTDistributor', function () {
     it('Should revert if claim is made before at least one day has elapsed', async () => {
       const leaf = keccak256(await addr1.getAddress());
       const proof = merkleTree.getHexProof(leaf);
+
+      await rewardDistributor.connect(addr1).claimReward(proof);
 
       await expect(rewardDistributor.connect(addr1).claimReward(proof)).to.be.revertedWith("Must wait for a day before claiming");
 

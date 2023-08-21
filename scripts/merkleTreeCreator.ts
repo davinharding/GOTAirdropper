@@ -14,7 +14,7 @@ interface StakeResponse {
 
 async function getStakeByAddress(address: string): Promise<StakeResponse> {
   const response = await axios.get<StakeResponse>(`https://explorer.thetatoken.org:8443/api/stake/${address}`);
-  // console.log('response.data.body', response.data.body)
+  console.log('response.data.body', response.data.body)
   return response.data;
 }
 

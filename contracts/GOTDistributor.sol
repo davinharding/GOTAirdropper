@@ -55,7 +55,7 @@ contract GOTDistributor is Ownable {
         require(daysSinceLastClaim >= 1e18, "Must wait for a day before claiming");      
 
         // Calculate the reward amount.
-        uint256 rewardAmount = (distributionRate) * daysSinceLastClaim; // convert eth value to wei and multiply by daysSinceLastClaim
+        uint256 rewardAmount = (distributionRate) * daysSinceLastClaim * amountStaked[msg.sender]; // convert eth value to wei and multiply by daysSinceLastClaim
 
         // Ensure the contract has enough tokens to pay the reward.
         require(rewardToken.balanceOf(address(this)) >= rewardAmount, "Not enough tokens");

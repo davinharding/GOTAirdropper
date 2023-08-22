@@ -1,8 +1,6 @@
 import { network, ethers } from "hardhat";
 import { expect } from 'chai';
 import { Contract, Signer } from 'ethers';
-import { MerkleTree } from 'merkletreejs';
-import keccak256 from 'keccak256';
 
 describe('GOTDistributor', function () {
   let 
@@ -12,8 +10,7 @@ describe('GOTDistributor', function () {
   addr1: Signer, 
   addr2: Signer, 
   addr3: Signer, 
-  rewardToken: any, 
-  merkleTree: MerkleTree;
+  rewardToken: any 
   
   const distributionRate: number = 10; // replace with your desired distribution rate
   
@@ -34,11 +31,11 @@ describe('GOTDistributor', function () {
     await rewardDistributor.deployed();
     
     // Transfer tokens to the RewardDistributor contract
-    await rewardToken.transfer(rewardDistributor.address, ethers.utils.parseEther('15'));
+    await rewardToken.transfer(rewardDistributor.address, ethers.utils.parseEther('105'));
 
     // Set amount staked mapping
     let sources: string[] = await Promise.all([addr1.getAddress(), addr2.getAddress()])
-    let amounts= [ethers.utils.parseEther('10'), ethers.utils.parseEther('20')];
+    let amounts= [ethers.BigNumber.from((10000000000000000000/1e18).toString()), ethers.BigNumber.from((20000000000000000000/1e18).toString())];
 
     await rewardDistributor.updateAmountStaked(sources, amounts);
   });
@@ -58,51 +55,41 @@ describe('GOTDistributor', function () {
       await expect(rewardDistributor.connect(addr3).claimReward()).to.be.revertedWith('No staked amount found for the sender');
     });
 
-    it('Should succeed if the merkle proof is valid', async function () {
+    it('Should succeed if the address has an amount staked', async function () {
       await network.provider.send("hardhat_mine", [ethers.utils.hexlify(41700)]);
 
-      const leaf = keccak256(await addr1.getAddress());
-      const proof = merkleTree.getHexProof(leaf);
-      await rewardDistributor.connect(addr1).claimReward(proof);
+      await rewardDistributor.connect(addr1).claimReward();
 
       const newBalance = await rewardToken.balanceOf(await addr1.getAddress());
 
-      expect(Math.round(parseFloat(ethers.utils.formatEther(newBalance.toString())))).to.equal(10); // even though 3 days have elapsed the first claim can only be for up to one day
+      expect(Math.round(parseFloat(ethers.utils.formatEther(newBalance.toString())))).to.equal(100); // even though 3 days have elapsed the first claim can only be for up to one day
     });
 
     it('Should revert if there are not enough tokens', async () => {
       await network.provider.send("hardhat_mine", [ethers.utils.hexlify(13900)]);
 
-      const leaf = keccak256(await addr1.getAddress());
-      const proof = merkleTree.getHexProof(leaf);
-
-      await rewardDistributor.connect(addr1).claimReward(proof);
+      await rewardDistributor.connect(addr1).claimReward();
 
       await network.provider.send("hardhat_mine", [ethers.utils.hexlify(13900)]);
 
-      await expect(rewardDistributor.connect(addr1).claimReward(proof)).to.be.revertedWith('Not enough tokens');
+      await expect(rewardDistributor.connect(addr1).claimReward()).to.be.revertedWith('Not enough tokens');
 
     })
 
     it('Should revert if claim is made before at least one day has elapsed', async () => {
-      const leaf = keccak256(await addr1.getAddress());
-      const proof = merkleTree.getHexProof(leaf);
 
-      await rewardDistributor.connect(addr1).claimReward(proof);
+      await rewardDistributor.connect(addr1).claimReward();
 
-      await expect(rewardDistributor.connect(addr1).claimReward(proof)).to.be.revertedWith("Must wait for a day before claiming");
+      await expect(rewardDistributor.connect(addr1).claimReward()).to.be.revertedWith("Must wait for a day before claiming");
 
     })
 
     it('Should revert if at least one day has not elapsed after a successful claim', async function () {
       await network.provider.send("hardhat_mine", [ethers.utils.hexlify(41700)]);
 
-      const leaf = keccak256(await addr1.getAddress());
-      const proof = merkleTree.getHexProof(leaf);
+      await rewardDistributor.connect(addr1).claimReward();
 
-      await rewardDistributor.connect(addr1).claimReward(proof);
-
-      await expect(rewardDistributor.connect(addr1).claimReward(proof)).to.be.revertedWith("Must wait for a day before claiming");
+      await expect(rewardDistributor.connect(addr1).claimReward()).to.be.revertedWith("Must wait for a day before claiming");
     });
 
     // Add more tests for different edge cases
@@ -135,7 +122,7 @@ describe('GOTDistributor', function () {
     })
 
     it('should revert if the contract balance is insufficient', async () => {
-      const amountToWithdraw = ethers.utils.parseEther('50');
+      const amountToWithdraw = ethers.utils.parseEther('110');
       
       // Owner trying to withdraw more tokens than the contract balance
       await expect(rewardDistributor.connect(owner).withdrawTokens(amountToWithdraw)).to.be.revertedWith("Insufficient tokens in contract");

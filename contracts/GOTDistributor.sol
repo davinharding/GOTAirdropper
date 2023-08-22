@@ -2,12 +2,10 @@
 pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract GOTDistributor is Ownable {
     IERC20 public rewardToken;
-    bytes32 public merkleRoot;
     uint256 public distributionRate;
     uint256 public contractBirth;
     uint256 public claimWaitTimeInBlocks;
@@ -17,17 +15,12 @@ contract GOTDistributor is Ownable {
     event RewardPaid(address indexed user, uint256 amount);
     event TokensWithdrawn(address indexed owner, uint256 amount);
 
-    constructor(IERC20 _rewardToken, bytes32 _merkleRoot, uint256 _distributionRate) {
+    constructor(IERC20 _rewardToken, uint256 _distributionRate) {
         rewardToken = _rewardToken;
-        merkleRoot = _merkleRoot;
         distributionRate = _distributionRate;
         contractBirth = block.number;
         claimWaitTimeInBlocks = 13900; // roughly one day in blocks on theta chain
     } 
-
-    function updateMerkleRoot(bytes32 _merkleRoot) external onlyOwner {
-        merkleRoot = _merkleRoot;
-    }
 
     function updateDistributionRate(uint256 _distributionRate) external onlyOwner {
         distributionRate = _distributionRate;
@@ -41,13 +34,20 @@ contract GOTDistributor is Ownable {
         claimWaitTimeInBlocks = _claimWaitTimeInBlocks;
     }
 
-    function claimReward(bytes32[] calldata merkleProof) external {
-        // Verify the merkle proof.
-        bytes32 leaf = keccak256(abi.encodePacked(msg.sender));
-        require(MerkleProof.verify(merkleProof, merkleRoot, leaf), "Invalid merkle proof");
+    function updateAmountStaked(address[] calldata sources, uint256[] calldata amounts) external onlyOwner {
+        require(sources.length == amounts.length, "Arrays must have equal length");
+
+        for (uint256 i = 0; i < sources.length; i++) {
+            amountStaked[sources[i]] = amounts[i];
+        }
+    }
+
+    function claimReward() external {
+        // Check if the sender has staked
+        require(amountStaked[msg.sender] > 0, "No staked amount found for the sender");
 
         // Calculate the number of days that have passed since the last claim.
-        if(lastClaimed[msg.sender] == 0){
+        if (lastClaimed[msg.sender] == 0) {
             lastClaimed[msg.sender] = block.number - claimWaitTimeInBlocks; // set towards current block number minus claimWaitTimeInBlocks so that the first time they claim they can only claim up to 10 GOT
         }
         uint256 daysSinceLastClaim = (block.number - lastClaimed[msg.sender]) * 1e18 / claimWaitTimeInBlocks; // * 1e18 to allow for fractions of a day 

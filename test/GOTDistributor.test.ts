@@ -21,12 +21,6 @@ describe('GOTDistributor', function () {
   beforeEach(async () => {
     RewardDistributor = await ethers.getContractFactory('GOTDistributor');
     [owner, addr1, addr2, addr3] = await ethers.getSigners();
-    
-    // Generate a merkle tree for the test
-    const testLeaves: Buffer[] = await Promise.all([owner, addr1, addr2, addr3].map(async address => keccak256(await address.getAddress())));
-
-    merkleTree = new MerkleTree(testLeaves, keccak256, { sort: true });
-    const merkleRoot: string = merkleTree.getHexRoot();
 
     // Deploy a mock ERC20 token for the reward
     let ethersToWei = ethers.utils.parseUnits("10000000", "ether");
@@ -36,14 +30,17 @@ describe('GOTDistributor', function () {
 
     // Deploy the RewardDistributor contract
     
-    rewardDistributor = await RewardDistributor.deploy(rewardToken.address, merkleRoot, distributionRate) as Contract;
+    rewardDistributor = await RewardDistributor.deploy(rewardToken.address, distributionRate) as Contract;
     await rewardDistributor.deployed();
     
     // Transfer tokens to the RewardDistributor contract
     await rewardToken.transfer(rewardDistributor.address, ethers.utils.parseEther('15'));
 
-    // Approve rewardDistributor for spending
-    // await rewardToken.approve(rewardDistributor.address, '1000000000000000000000000');
+    // Set amount staked mapping
+    let sources: string[] = await Promise.all([addr1.getAddress(), addr2.getAddress()])
+    let amounts= [ethers.utils.parseEther('10'), ethers.utils.parseEther('20')];
+
+    await rewardDistributor.updateAmountStaked(sources, amounts);
   });
 
   describe('Deployment', function () {
@@ -54,15 +51,11 @@ describe('GOTDistributor', function () {
     it('Should set the right reward token', async function () {
       expect(await rewardDistributor.rewardToken()).to.equal(await rewardToken.address);
     });
-
-    it('Should set the right merkle root', async function () {
-      expect(await rewardDistributor.merkleRoot()).to.equal(merkleTree.getHexRoot());
-    });
   });
 
   describe('claimReward', function () {
-    it('Should fail if the merkle proof is invalid', async function () {
-      await expect(rewardDistributor.connect(owner).claimReward([])).to.be.revertedWith('Invalid merkle proof');
+    it('Should fail if the address amount staked is 0', async function () {
+      await expect(rewardDistributor.connect(addr3).claimReward()).to.be.revertedWith('No staked amount found for the sender');
     });
 
     it('Should succeed if the merkle proof is valid', async function () {

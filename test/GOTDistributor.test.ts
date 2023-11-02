@@ -12,7 +12,7 @@ describe('GOTDistributor', function () {
   addr3: Signer, 
   rewardToken: any 
   
-  const distributionRate: number = 10; // replace with your desired distribution rate
+  const distributionRate: any = ethers.BigNumber.from("10000000000000000000"); // 10e18 which represent 10 eth converted to wei.  This is because in prod we want to use small decimal values for this number which would otherwise break solidity since we must use integers
   
 
   beforeEach(async () => {
@@ -35,7 +35,7 @@ describe('GOTDistributor', function () {
 
     // Set amount staked mapping
     let sources: string[] = await Promise.all([addr1.getAddress(), addr2.getAddress()])
-    let amounts= [ethers.BigNumber.from((10000000000000000000/1e18).toString()), ethers.BigNumber.from((20000000000000000000/1e18).toString())];
+    let amounts= [ethers.BigNumber.from((10000000000000000000000/1e18).toString()), ethers.BigNumber.from((20000000000000000000000/1e18).toString())];
 
     await rewardDistributor.updateAmountStaked(sources, amounts);
   });
@@ -57,6 +57,8 @@ describe('GOTDistributor', function () {
 
     it('Should succeed if the address has an amount staked', async function () {
       await network.provider.send("hardhat_mine", [ethers.utils.hexlify(41700)]);
+
+      console.log(await rewardDistributor.amountStaked(addr1.getAddress()));
 
       await rewardDistributor.connect(addr1).claimReward();
 

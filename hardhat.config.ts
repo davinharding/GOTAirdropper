@@ -16,7 +16,7 @@ const config: HardhatUserConfig = {
     },
     thetaMainnet: {
       url: `https://eth-rpc-api.thetatoken.org/rpc`,
-      // accounts: [THETA_MAINNET_KEY as string],
+      accounts: [THETA_MAINNET_KEY as string],
       chainId: 361,
       gasPrice: 4000000000000
     }

@@ -52,10 +52,12 @@ contract GOTDistributor is Ownable {
         }
         uint256 daysSinceLastClaim = (block.number - lastClaimed[msg.sender]) * 1e18 / claimWaitTimeInBlocks; // * 1e18 to allow for fractions of a day 
         // Ensure the user waits for at least a day between claims.
-        require(daysSinceLastClaim >= 1e18, "Must wait for a day before claiming");      
+        require(daysSinceLastClaim >= 1e18, "Must wait for a day before claiming");   
+
+        uint256 amountStakedMulitplier = amountStaked[msg.sender] / 1000;  
 
         // Calculate the reward amount.
-        uint256 rewardAmount = (distributionRate) * daysSinceLastClaim * amountStaked[msg.sender]; // convert eth value to wei and multiply by daysSinceLastClaim
+        uint256 rewardAmount = ((distributionRate) * daysSinceLastClaim * amountStakedMulitplier) / 1e18; // convert eth value to wei and multiply by daysSinceLastClaim
 
         // Ensure the contract has enough tokens to pay the reward.
         require(rewardToken.balanceOf(address(this)) >= rewardAmount, "Not enough tokens");

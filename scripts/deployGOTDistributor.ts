@@ -7,9 +7,8 @@ async function main() {
 
   const RewardDistributor = await ethers.getContractFactory('GOTDistributor');
   const rewardDistributor = await RewardDistributor.deploy(
-    "0xb8a9116493e191a43224e3971c7e9f23522b0883",  
-    "0xb4e44aea7ffdc2797b046470c1a9c33f2a249404806c276832a71fb72f1db685", 
-    10, 
+    "0xe943b24169c5261e727a0f5146feb4fb63eb4c14",  // Mainnet
+    0.0000001, // Prod value determined by GuardianOfTheta
     );
   await rewardDistributor.deployed();
 

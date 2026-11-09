@@ -2,7 +2,7 @@
 
 A gas-efficient reward distributor for the Guardian of Theta (GOT) token. Instead of pushing tokens to every staker, the contract stores a single **Merkle root** of eligible addresses, and each staker pulls their own reward with a proof.
 
-Part of the **Theta Vibes / Guardian of Theta** project: [frontend](https://github.com/davinharding/guardian-of-theta-frontend) · [NFT staking contracts](https://github.com/davinharding/staking-guardina-of-theta) · [GOT reward airdropper](https://github.com/davinharding/GOTAirdropper)
+Part of the **Theta Vibes / Guardian of Theta** project: [frontend](https://github.com/davinharding/guardian-of-theta-frontend) · [NFT staking contracts](https://github.com/davinharding/staking-guardian-of-theta) · [GOT reward airdropper](https://github.com/davinharding/GOTAirdropper)
 
 ## How it works
 
